@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 import '../../screen/home.dart';
 import '../../utils/button.dart';
 import '../../utils/constants.dart';
+import '../../utils/env.dart';
 import '../../utils/firebase_push_notifications.dart';
 
 part '_event.dart';
@@ -86,8 +87,7 @@ class SignInBloc extends Bloc<SignInScreenEvent, SignInScreenState> {
                           Uri.parse('https://fcm.googleapis.com/fcm/send'),
                           headers: {
                             'Content-Type': 'application/json',
-                            'Authorization':
-                                'key=AAAACqE23qk:APA91bFkz4rBHfCE3PTfeDWX0Guz83JCkH5WMQMe38M6U_Pz5-oNAcLVDs5LomdD2t_aMgNpqtGShomTv9ETfghVHHUsVrzys8WT7vYJ8jnyKzPgFVouG2aC5PpNoSvvjOHlhPHdcHSd',
+                            'Authorization': 'key=$messagingAPIKey',
                           },
                           body: jsonEncode(
                             {
