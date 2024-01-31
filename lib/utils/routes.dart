@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:only_one_device_can_login_at_a_time_using_firebase/controller/home/_bloc.dart';
 
 import '../controller/sign_in/_bloc.dart';
 import '../screen/home.dart';
@@ -20,7 +21,10 @@ class Routes {
           ),
         );
       case HomeScreen.screenName:
-        return _route(const HomeScreen());
+        return _route(BlocProvider(
+          create: (context) => HomeScreenBloc(),
+          child: const HomeScreen(),
+        ));
       default:
         return _route(const ErrorScreen());
     }

@@ -31,9 +31,14 @@ class SignInBloc extends Bloc<SignInScreenEvent, SignInScreenState> {
   }
   Future<void> _initialization(
       Initial event, Emitter<SignInScreenState> emit) async {
-    await FirebasePushNotifications().requestPermission().whenComplete(
-          () => _loaded,
-        );
+    try {
+      await FirebasePushNotifications().requestPermission().whenComplete(
+            () => _loaded,
+          );
+    } catch (e) {
+      log(e.toString());
+      _error;
+    }
   }
 
   Future<void> _signIn(SignIn event, Emitter<SignInScreenState> emit) async {
