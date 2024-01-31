@@ -46,8 +46,10 @@ class SignInBloc extends Bloc<SignInScreenEvent, SignInScreenState> {
           password: passwordController.text,
         )
             .then((userCredential) async {
-          DocumentSnapshot documentSnapshot =
-              await firebaseFirestore.collection('companies').doc('abc').get();
+          DocumentSnapshot documentSnapshot = await firebaseFirestore
+              .collection('companies')
+              .doc(userCredential.user!.uid)
+              .get();
           String cloudToken = (documentSnapshot.data() as Map)['token'];
           await FirebaseMessaging.instance.getToken().then((token) async {
             if (cloudToken == token) {
@@ -98,7 +100,7 @@ class SignInBloc extends Bloc<SignInScreenEvent, SignInScreenState> {
                             .whenComplete(() async {
                           await firebaseFirestore
                               .collection('companies')
-                              .doc('abc')
+                              .doc(userCredential.user!.uid)
                               .set({'token': token}).whenComplete(() {
                             Navigator.pushReplacementNamed(
                                 event.context, HomeScreen.screenName);
@@ -140,7 +142,7 @@ class SignInBloc extends Bloc<SignInScreenEvent, SignInScreenState> {
           await FirebaseMessaging.instance.getToken().then((token) async {
             await firebaseFirestore
                 .collection('companies')
-                .doc(userCredential.user!.uid)
+                .doc(userCredential.user!.uid) // Store token at uid doc
                 .set({'token': token}).whenComplete(
               () => Navigator.pushReplacementNamed(
                   event.context, HomeScreen.screenName),
