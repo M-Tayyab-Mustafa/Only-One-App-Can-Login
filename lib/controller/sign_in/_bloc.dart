@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+
 import 'dart:convert';
 import 'dart:developer';
 
@@ -30,20 +32,14 @@ class SignInBloc extends Bloc<SignInScreenEvent, SignInScreenState> {
   Future<void> _initialization(
       Initial event, Emitter<SignInScreenState> emit) async {
     await FirebasePushNotifications().requestPermission().whenComplete(
-          () => emit(
-            Loaded(
-              formKey: formKey,
-              emailController: emailController,
-              passwordController: passwordController,
-            ),
-          ),
+          () => _loaded,
         );
   }
 
   Future<void> _signIn(SignIn event, Emitter<SignInScreenState> emit) async {
     try {
       if (formKey.currentState!.validate()) {
-        emit(Loading());
+        _loading;
         await firebaseAuth
             .signInWithEmailAndPassword(
           email: emailController.text.toLowerCase(),
@@ -70,13 +66,7 @@ class SignInBloc extends Bloc<SignInScreenEvent, SignInScreenState> {
                       title: 'Cancel',
                       onPressed: () {
                         Navigator.pop(context);
-                        emit(
-                          Loaded(
-                            formKey: formKey,
-                            emailController: emailController,
-                            passwordController: passwordController,
-                          ),
-                        );
+                        _loaded;
                       },
                     ),
                     CustomButton(
@@ -126,59 +116,50 @@ class SignInBloc extends Bloc<SignInScreenEvent, SignInScreenState> {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'invalid-credential') {
         showErrorToast(msg: 'Please check you\'r email or password');
-        emit(Loaded(
-            formKey: formKey,
-            emailController: emailController,
-            passwordController: passwordController));
+        _loaded;
       } else {
         showErrorToast(msg: 'Some thing went wrong');
-        emit(Loaded(
-            formKey: formKey,
-            emailController: emailController,
-            passwordController: passwordController));
+        _loaded;
       }
     } catch (exception) {
       log(exception.toString());
-      emit(Error());
+      _error;
     }
   }
 
   Future<void> _signUp(SignUp event, Emitter<SignInScreenState> emit) async {
     try {
       if (formKey.currentState!.validate()) {
-        emit(Loading());
-        await firebaseAuth.createUserWithEmailAndPassword(
+        _loading;
+        await firebaseAuth
+            .createUserWithEmailAndPassword(
           email: emailController.text,
           password: passwordController.text,
-        );
-        await FirebaseMessaging.instance.getToken().then((token) async {
-          await firebaseFirestore
-              .collection('companies')
-              .doc('abc')
-              .set({'token': token}).whenComplete(
-            () => Navigator.pushReplacementNamed(
-                event.context, HomeScreen.screenName),
-          );
+        )
+            .then((userCredential) async {
+          await FirebaseMessaging.instance.getToken().then((token) async {
+            await firebaseFirestore
+                .collection('companies')
+                .doc(userCredential.user!.uid)
+                .set({'token': token}).whenComplete(
+              () => Navigator.pushReplacementNamed(
+                  event.context, HomeScreen.screenName),
+            );
+          });
         });
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         showErrorToast(msg: 'User already exist with this email.');
-        emit(Loaded(
-            formKey: formKey,
-            emailController: emailController,
-            passwordController: passwordController));
+        _loaded;
       } else {
         showErrorToast(msg: 'Some thing went wrong');
-        emit(Loaded(
-            formKey: formKey,
-            emailController: emailController,
-            passwordController: passwordController));
+        _loaded;
       }
     } catch (exception) {
       showErrorToast(msg: 'Some thing went wrong');
       log(exception.toString());
-      emit(Error());
+      _error;
     }
   }
 
@@ -188,4 +169,14 @@ class SignInBloc extends Bloc<SignInScreenEvent, SignInScreenState> {
     passwordController.dispose();
     return super.close();
   }
+
+  get _loaded => emit(
+        Loaded(
+          formKey: formKey,
+          emailController: emailController,
+          passwordController: passwordController,
+        ),
+      );
+  get _loading => emit(Loading());
+  get _error => emit(Error());
 }
