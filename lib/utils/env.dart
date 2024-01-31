@@ -1,2 +1,0 @@
-String messagingAPIKey =
-    'AAAACqE23qk:APA91bFkz4rBHfCE3PTfeDWX0Guz83JCkH5WMQMe38M6U_Pz5-oNAcLVDs5LomdD2t_aMgNpqtGShomTv9ETfghVHHUsVrzys8WT7vYJ8jnyKzPgFVouG2aC5PpNoSvvjOHlhPHdcHSd';
